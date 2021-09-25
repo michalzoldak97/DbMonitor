@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  back_app:
+    build:
+      context: ./back_app/
+      dockerfile: Dockerfile
+    container_name: back_app
+    ports:
+      - 3000:3000
+    volumes:
+      - ./back_app/:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
+    env_file: ./back_app/config.env
