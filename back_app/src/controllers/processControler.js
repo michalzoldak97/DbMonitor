@@ -3,9 +3,7 @@ const AppError = require('./../utils/appError');
 const checkDb = require('./../utils/checkDb');
 
 exports.checkDb = catchAsync(async (req, res, next) => {
-  const {
-    rows
-  } = await checkDb.singleQuery(
+  const rows = await checkDb.singleQuery(
     `SELECT * FROM plr.tbl_player WHERE player_id = $1`,
     [1]
   );
