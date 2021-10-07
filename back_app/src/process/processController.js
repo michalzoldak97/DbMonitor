@@ -1,5 +1,5 @@
 const { catchAsync, AppError } = require('../error');
-const { checkDb } = require('../utils');
+const { checkDb, checkDbInternal } = require('../utils');
 
 exports.checkDatabase = catchAsync(async (req, res, next) => {
   req.queryText = `SELECT * FROM plr.tbl_player WHERE player_id = $1`;
@@ -10,5 +10,15 @@ exports.checkDatabase = catchAsync(async (req, res, next) => {
     status: 'success',
     message: 'check db called',
     rows
+  });
+});
+
+exports.checkInternalDatabase = catchAsync(async (req, res, next) => {
+  const checkResult = await checkDbInternal.checkDbInternal(req, res, next);
+  if (!checkResult) return next(new AppError('Check Fail', 500));
+  res.status(200).json({
+    status: 'success',
+    message: 'internal do called',
+    checkResult
   });
 });

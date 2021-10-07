@@ -20,7 +20,7 @@ services:
     image: postgres:13
     container_name: postgredb
     ports:
-      - "5454:5432"
+      - "5454:5454"
     env_file:
       - ./postgredb/pgconfig/postgredb.env
     volumes:
