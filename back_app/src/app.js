@@ -1,7 +1,7 @@
 const express = require('express');
 
 const { AppError, globalErrorHandler } = require('./error');
-const processRouter = require('./routes/processRoutes');
+const { processRouter } = require('./routes');
 
 const app = express();
 
