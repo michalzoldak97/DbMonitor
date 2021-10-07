@@ -14,3 +14,20 @@ services:
     stdin_open: true
     tty: true
     env_file: ./back_app/config.env
+    restart: always
+
+  postgresql:
+    image: postgres:13
+    container_name: postgredb
+    ports:
+      - "5454:5432"
+    env_file:
+      - ./postgredb/pgconfig/postgredb.env
+    volumes:
+      - ./postgredb/pgconfig/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./postgredb/datapg:/var/lib/postgresql/data
+      - ./postgredb/pgconfig/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: always

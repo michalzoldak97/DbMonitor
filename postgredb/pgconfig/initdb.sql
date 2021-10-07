@@ -18,6 +18,7 @@ CREATE TABLE usr.tbl_user(
    password VARCHAR(255) NOT NULL,
    created_by_user_id BIGSERIAL NOT NULL,
    created_datetime TIMESTAMP DEFAULT NOW(),
+   last_logged_in TIMESTAMP,
    deactivated_datetime TIMESTAMP
 )
 ;

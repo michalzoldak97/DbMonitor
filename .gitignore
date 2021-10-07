@@ -1,4 +1,7 @@
 *.env
+*.conf
 node_modules/
 postgredb/pgdata/
 keys/
+pgdata/
+datapg/

@@ -1,4 +1,4 @@
-FROM node
+FROM node:16
 
 WORKDIR /app
 
@@ -9,4 +9,4 @@ RUN npm install -g nodemon
 
 EXPOSE 3000
 
-CMD ["nodemon", "/src/server.js"]
+CMD ["npm", "run", "dev"]
