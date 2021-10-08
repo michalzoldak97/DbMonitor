@@ -1,10 +1,10 @@
 const express = require('express');
-const processController = require('./../process/processController');
+const { checkDatabase, checkInternalDatabase } = require('./../process');
 
 const router = express.Router();
 
-router.route('/checkdb').get(processController.checkDatabase);
+router.route('/checkdb').get(checkDatabase);
 
-router.route('/checkdbinter').get(processController.checkInternalDatabase);
+router.route('/checkdbinter').get(checkInternalDatabase);
 
 module.exports = router;

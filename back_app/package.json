@@ -16,10 +16,11 @@
   "dependencies": {
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
-    "validator": "^13.6.0",
     "pg": "^8.7.1",
     "tunnel-ssh": "^4.1.4",
-    "fs": "^0.0.1-security"
+    "fs": "^0.0.1-security",
+    "bcrypt": "^5.0.1",
+    "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
     "prettier": "1.19.1"
