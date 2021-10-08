@@ -16,3 +16,8 @@ exports.singleQuery = catchAsync(async (req, res, next) => {
   queryRes.duration = Date.now() - start;
   return queryRes;
 });
+
+exports.singleQuerySync = q => {
+  const queryRes = pool.query(q.queryText, q.queryParam);
+  return queryRes;
+};

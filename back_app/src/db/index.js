@@ -1,2 +1,2 @@
-const { singleQuery } = require('./dbManager');
-module.exports = { singleQuery };
+const { singleQuery, singleQuerySync } = require('./dbManager');
+module.exports = { singleQuery, singleQuerySync };

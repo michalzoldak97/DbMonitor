@@ -3,6 +3,15 @@ const bcrypt = require('bcrypt');
 const { catchAsync, AppError } = require('../error');
 const { isValidEmail, isValidPasword } = require('../utils');
 
+exports.selectUser = catchAsync(async (req, res, next) => {
+  req.queryText = `SELECT * FROM usr.tbl_user
+                    WHERE user_id = $1`;
+  req.queryParam = [req.params.id];
+  const { rows } = await dbPool.singleQuery(req, res, next);
+  if (!rows.length) return 0;
+  return rows[0].email;
+});
+
 exports.insertUser = catchAsync(async (req, res, next) => {
   if (
     !req.body.creatingUserId ||
