@@ -1,6 +1,11 @@
-const { login, validateToken } = require('./authController');
+const {
+  login,
+  validateToken,
+  validatePermission
+} = require('./authController');
 
 module.exports = {
   login,
-  validateToken
+  validateToken,
+  validatePermission
 };

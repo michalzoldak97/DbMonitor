@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
 const { catchAsync, AppError } = require('../error');
-const { use } = require('../routes/processRoutes');
 const userModel = require('../user/userModel');
+
 const getAppConfig = async () => {
   const { appConfig } = await require('../utils/config');
   return appConfig;
@@ -24,7 +24,6 @@ const createSendToken = (user, statusCode, res) => {
     }
   });
 };
-
 exports.login = catchAsync(async (req, res, next) => {
   const appConfig = await getAppConfig();
   const { email, password } = req.body;
@@ -62,9 +61,21 @@ exports.validateToken = catchAsync(async (req, res, next) => {
       await userModel.selectUserPermissions(decodedJwt.id)
     ).rows.map(row => row.permission_id)
   };
-  console.log(activeUser);
   if (!activeUser.permissions.length)
     return next(new AppError(appConfig.error.messages.userAuthFail, 401));
   req.user = activeUser;
   next();
 });
+
+exports.validatePermission = (...perm) => {
+  return async (req, res, next) => {
+    const {
+      user: { permissions }
+    } = await getAppConfig();
+    perm.forEach(p => {
+      if (!req.user.permissions.includes(permissions[p]))
+        return next(new AppError('Permission denied', 403));
+    });
+    next();
+  };
+};
