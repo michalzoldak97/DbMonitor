@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { promisify } = require('util');
 const { catchAsync, AppError } = require('../error');
 const { use } = require('../routes/processRoutes');
 const userModel = require('../user/userModel');
@@ -42,4 +43,28 @@ exports.login = catchAsync(async (req, res, next) => {
       new AppError(appConfig.error.messages.userInvalidCredentials, 401)
     );
   createSendToken(user, 200, res);
+});
+
+exports.validateToken = catchAsync(async (req, res, next) => {
+  let token;
+  const appConfig = await getAppConfig();
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  )
+    token = req.headers.authorization.split(' ')[1];
+  if (!token)
+    return next(new AppError(appConfig.error.messages.userAuthFail, 401));
+  const decodedJwt = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  const activeUser = {
+    id: decodedJwt.id,
+    permissions: (
+      await userModel.selectUserPermissions(decodedJwt.id)
+    ).rows.map(row => row.permission_id)
+  };
+  console.log(activeUser);
+  if (!activeUser.permissions.length)
+    return next(new AppError(appConfig.error.messages.userAuthFail, 401));
+  req.user = activeUser;
+  next();
 });

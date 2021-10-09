@@ -33,9 +33,23 @@ exports.insertUser = async req => {
     };
   }
   const encryptedPass = await bcrypt.hash(req.body.password, 12);
-  queryText = `INSERT INTO usr.tbl_user(email, password, created_by_user_id)
+  const queryText = `INSERT INTO usr.tbl_user(email, password, created_by_user_id)
                    VALUES ($1, $2, $3)`;
-  queryParam = [req.body.email, encryptedPass, req.body.creatingUserId];
+  const queryParam = [req.body.email, encryptedPass, req.body.creatingUserId];
   const queryRes = await dbPool.singleQuery(queryText, queryParam);
+  return queryRes;
+};
+
+exports.selectUserPermissions = async id => {
+  const queryText = `SELECT DISTINCT
+                        up.permission_id
+                     FROM usr.tbl_permission p
+                     INNER JOIN usr.tbl_user_permission up          ON p.permission_id = up.permission_id
+                     INNER JOIN usr.tbl_user u                      ON up.user_id = u.user_id
+                     WHERE
+                        p.deactivated_datetime IS NULL
+                        AND u.deactivated_datetime IS NULL
+                        AND up.user_id = $1`;
+  const queryRes = await dbPool.singleQuery(queryText, [id]);
   return queryRes;
 };
