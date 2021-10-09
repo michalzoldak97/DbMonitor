@@ -1,5 +1,4 @@
 const { Pool } = require('pg');
-const { catchAsync, AppError } = require('../error');
 
 const pool = new Pool({
   user: process.env.DBUSER,
@@ -9,13 +8,12 @@ const pool = new Pool({
   port: process.env.DBPORT
 });
 
-exports.singleQuery = catchAsync(async (req, res, next) => {
+exports.singleQuery = async (queryText, queryParam) => {
   const start = Date.now();
-  const queryRes = await pool.query(req.queryText, req.queryParam);
-  if (!queryRes) return next(new AppError('Internal db query fail', 500));
+  const queryRes = await pool.query(queryText, queryParam);
   queryRes.duration = Date.now() - start;
   return queryRes;
-});
+};
 
 exports.singleQuerySync = q => {
   const queryRes = pool.query(q.queryText, q.queryParam);
