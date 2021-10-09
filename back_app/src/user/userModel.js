@@ -18,7 +18,7 @@ exports.selectUser = async config => {
   const { rows } = await dbPool.singleQuery(queryText, queryParam);
   if (!rows.length) return 0;
   if (config.scope === 'unrestricted') return rows[0];
-  else return rows[0].email;
+  else return { id: rows[0].user_id, email: rows[0].email };
 };
 
 exports.selectUsers = async config => {
@@ -27,7 +27,10 @@ exports.selectUsers = async config => {
                           deactivated_datetime IS NULL`;
   const { rows } = await dbPool.singleQuery(queryText, []);
   if (config.scope === 'unrestricted') return rows;
-  else return rows.map(usr => usr.email);
+  else
+    return rows.map(usr => {
+      return { id: usr.user_id, email: usr.email };
+    });
 };
 
 exports.insertUser = async req => {
@@ -43,7 +46,7 @@ exports.insertUser = async req => {
   }
   const encryptedPass = await bcrypt.hash(req.body.password, 12);
   const queryText = `INSERT INTO usr.tbl_user(email, password, created_by_user_id)
-                   VALUES ($1, $2, $3)`;
+                     VALUES ($1, $2, $3)`;
   const queryParam = [req.body.email, encryptedPass, req.body.creatingUserId];
   const queryRes = await dbPool.singleQuery(queryText, queryParam);
   return queryRes;
@@ -74,4 +77,8 @@ exports.selectUserPermissions = async id => {
                         AND up.user_id = $1`;
   const queryRes = await dbPool.singleQuery(queryText, [id]);
   return queryRes;
+};
+
+exports.selectUserSetUp = async id => {
+  const queryText = '';
 };

@@ -84,10 +84,10 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
 exports.modifyPass = catchAsync(async (req, res, next) => {
   const newPass = await bcrypt.hash(req.body.newPassword, 12);
   const qConfig = {
-    id: 'email',
+    id: 'user_id',
     toChange: 'password',
     val: newPass,
-    condition: req.body.email
+    condition: req.body.id
   };
   changedUser = await userModel.updateUser(qConfig);
   if (!changedUser)
@@ -96,6 +96,18 @@ exports.modifyPass = catchAsync(async (req, res, next) => {
     message: 'success',
     data: {
       changedUser
+    }
+  });
+});
+
+exports.getUserSetup = catchAsync(async (req, res, next) => {
+  let usrSetUp = req.user;
+  if (!usrSetUp)
+    return next(new AppError('appConfig.error.messages.userNotFound'), 404);
+  res.status(200).json({
+    message: 'success',
+    data: {
+      usrSetUp
     }
   });
 });

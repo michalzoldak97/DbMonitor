@@ -5,3 +5,4 @@ postgredb/pgdata/
 keys/
 pgdata/
 datapg/
+backups/

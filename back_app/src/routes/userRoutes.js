@@ -1,29 +1,27 @@
 const express = require('express');
-const {
-  createUser,
-  getUser,
-  getUserAll,
-  deleteUser,
-  modifyPass
-} = require('../user');
+const { user } = require('../user');
 const { login, validateToken, validatePermission } = require('../auth');
 
 const router = express.Router();
 
-router
-  .route('/')
-  .get(validateToken, validatePermission('userView'), getUserAll)
-  .post(validateToken, validatePermission('userCreate'), createUser);
-
-router
-  .route('/:id')
-  .get(validateToken, validatePermission('userView'), getUser)
-  .delete(validateToken, validatePermission('userDelete'), deleteUser);
-
 router.post('/login', login);
+
+router.use(validateToken);
+
+router.route('/mysetup').get(user.getUserSetup);
 
 router
   .route('/updatePass')
-  .patch(validateToken, validatePermission('userModify'), modifyPass);
+  .patch(validatePermission('userModify'), user.modifyPass);
+
+router
+  .route('/')
+  .get(validatePermission('userView'), user.getUserAll)
+  .post(validatePermission('userCreate'), user.createUser);
+
+router
+  .route('/:id')
+  .get(validatePermission('userView'), user.getUser)
+  .delete(validatePermission('userDelete'), user.deleteUser);
 
 module.exports = router;

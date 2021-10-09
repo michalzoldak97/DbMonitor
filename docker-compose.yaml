@@ -27,6 +27,7 @@ services:
       - ./postgredb/pgconfig/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./postgredb/datapg:/var/lib/postgresql/data
       - ./postgredb/pgconfig/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+      - ./postgredb/pgconfig/backups:/backups
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
     extra_hosts:
       - "host.docker.internal:host-gateway"
