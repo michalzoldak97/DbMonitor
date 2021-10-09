@@ -1,10 +1,27 @@
 const { catchAsync, AppError } = require('../error');
+const bcrypt = require('bcrypt');
 const userModel = require('./userModel');
 
 const getAppConfig = async () => {
   const { appConfig } = await require('../utils/config');
   return appConfig;
 };
+
+exports.getUserAll = catchAsync(async (req, res, next) => {
+  const appConfig = await getAppConfig();
+  const getConfig = {
+    scope: 'restricted'
+  };
+  const users = await userModel.selectUsers(getConfig);
+  if (!users)
+    return next(new AppError(`${appConfig.error.messages.userNotFound}`, 404));
+  res.status(200).json({
+    message: 'success',
+    data: {
+      users
+    }
+  });
+});
 
 exports.getUser = catchAsync(async (req, res, next) => {
   const appConfig = await getAppConfig();
@@ -42,6 +59,43 @@ exports.createUser = catchAsync(async (req, res, next) => {
     status: 'success',
     data: {
       rowsChanged: newUser.rowCount
+    }
+  });
+});
+
+exports.deleteUser = catchAsync(async (req, res, next) => {
+  const qConfig = {
+    id: 'user_id',
+    toChange: 'deactivated_datetime',
+    val: new Date(Date.now()),
+    condition: req.params.id
+  };
+  changedUser = await userModel.updateUser(qConfig);
+  if (!changedUser)
+    return next(new AppError('appConfig.error.messages.userNotFound'), 404);
+  res.status(200).json({
+    message: 'success',
+    data: {
+      changedUser
+    }
+  });
+});
+
+exports.modifyPass = catchAsync(async (req, res, next) => {
+  const newPass = await bcrypt.hash(req.body.newPassword, 12);
+  const qConfig = {
+    id: 'email',
+    toChange: 'password',
+    val: newPass,
+    condition: req.body.email
+  };
+  changedUser = await userModel.updateUser(qConfig);
+  if (!changedUser)
+    return next(new AppError('appConfig.error.messages.userNotFound'), 404);
+  res.status(200).json({
+    message: 'success',
+    data: {
+      changedUser
     }
   });
 });

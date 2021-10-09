@@ -21,6 +21,15 @@ exports.selectUser = async config => {
   else return rows[0].email;
 };
 
+exports.selectUsers = async config => {
+  const queryText = `SELECT * FROM usr.tbl_user
+                      WHERE
+                          deactivated_datetime IS NULL`;
+  const { rows } = await dbPool.singleQuery(queryText, []);
+  if (config.scope === 'unrestricted') return rows;
+  else return rows.map(usr => usr.email);
+};
+
 exports.insertUser = async req => {
   if (
     !req.body.creatingUserId ||
@@ -36,6 +45,19 @@ exports.insertUser = async req => {
   const queryText = `INSERT INTO usr.tbl_user(email, password, created_by_user_id)
                    VALUES ($1, $2, $3)`;
   const queryParam = [req.body.email, encryptedPass, req.body.creatingUserId];
+  const queryRes = await dbPool.singleQuery(queryText, queryParam);
+  return queryRes;
+};
+
+exports.updateUser = async config => {
+  const queryText = pgFormat(
+    `UPDATE usr.tbl_user
+     SET %I = $1
+     WHERE %I = $2`,
+    config.toChange,
+    config.id
+  );
+  const queryParam = [config.val, config.condition];
   const queryRes = await dbPool.singleQuery(queryText, queryParam);
   return queryRes;
 };
