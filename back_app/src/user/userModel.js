@@ -48,8 +48,7 @@ exports.insertUser = async req => {
   const queryText = `INSERT INTO usr.tbl_user(email, password, created_by_user_id)
                      VALUES ($1, $2, $3)`;
   const queryParam = [req.body.email, encryptedPass, req.body.creatingUserId];
-  const queryRes = await dbPool.singleQuery(queryText, queryParam);
-  return queryRes;
+  return await dbPool.singleQuery(queryText, queryParam);
 };
 
 exports.updateUser = async config => {
@@ -61,8 +60,8 @@ exports.updateUser = async config => {
     config.id
   );
   const queryParam = [config.val, config.condition];
-  const queryRes = await dbPool.singleQuery(queryText, queryParam);
-  return queryRes;
+  const { rowCount } = await dbPool.singleQuery(queryText, queryParam);
+  return rowCount;
 };
 
 exports.selectUserPermissions = async id => {
@@ -75,10 +74,11 @@ exports.selectUserPermissions = async id => {
                         p.deactivated_datetime IS NULL
                         AND u.deactivated_datetime IS NULL
                         AND up.user_id = $1`;
-  const queryRes = await dbPool.singleQuery(queryText, [id]);
-  return queryRes;
+  return await dbPool.singleQuery(queryText, [id]);
 };
 
 exports.selectUserSetUp = async id => {
-  const queryText = '';
+  const queryText = 'SELECT * FROM app.sp_user_settings($1)';
+  const { rows } = await dbPool.singleQuery(queryText, [id]);
+  return rows;
 };

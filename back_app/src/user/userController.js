@@ -70,13 +70,13 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
     val: new Date(Date.now()),
     condition: req.params.id
   };
-  changedUser = await userModel.updateUser(qConfig);
-  if (!changedUser)
+  changedUsers = await userModel.updateUser(qConfig);
+  if (!changedUsers)
     return next(new AppError('appConfig.error.messages.userNotFound'), 404);
   res.status(200).json({
     message: 'success',
     data: {
-      changedUser
+      changedUsers
     }
   });
 });
@@ -89,19 +89,19 @@ exports.modifyPass = catchAsync(async (req, res, next) => {
     val: newPass,
     condition: req.body.id
   };
-  changedUser = await userModel.updateUser(qConfig);
-  if (!changedUser)
+  changedUsers = await userModel.updateUser(qConfig);
+  if (!changedUsers)
     return next(new AppError('appConfig.error.messages.userNotFound'), 404);
   res.status(200).json({
     message: 'success',
     data: {
-      changedUser
+      changedUsers
     }
   });
 });
 
 exports.getUserSetup = catchAsync(async (req, res, next) => {
-  let usrSetUp = req.user;
+  const usrSetUp = await userModel.selectUserSetUp(req.user.id);
   if (!usrSetUp)
     return next(new AppError('appConfig.error.messages.userNotFound'), 404);
   res.status(200).json({
