@@ -1,5 +1,6 @@
-processRouter = require('./processRoutes');
-userRouter = require('./userRoutes');
+'use strict';
+const processRouter = require('./processRoutes');
+const userRouter = require('./userRoutes');
 
 module.exports = {
   processRouter,

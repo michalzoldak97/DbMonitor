@@ -1,3 +1,4 @@
+'use strict';
 const express = require('express');
 const { user } = require('../user');
 const { login, validateToken, validatePermission } = require('../auth');

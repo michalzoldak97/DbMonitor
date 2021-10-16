@@ -1,3 +1,4 @@
+'use strict';
 const dbPool = require('../db');
 const pgFormat = require('pg-format');
 const bcrypt = require('bcrypt');

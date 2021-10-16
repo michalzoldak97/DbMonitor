@@ -1,3 +1,4 @@
+'use strict';
 const checkDb = require('./checkDb');
 const checkDbInternal = require('./checkDbInternal');
 const { isValidEmail, isValidPasword } = require('./validator');

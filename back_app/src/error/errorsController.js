@@ -1,7 +1,19 @@
+'use strict';
 const AppError = require('./appError');
 
-const handleJwtExpired = () =>
-  new AppError('Your token has expired! Please log in again.', 401);
+const getAppConfig = async () => {
+  const { appConfig } = await require('../utils/config');
+  return appConfig;
+};
+
+const handleJwtExpired = () => {
+  const appConfig = getAppConfig();
+  return new AppError(appConfig.error.messages.userAuthFail, 401);
+};
+const handleJwtError = () => {
+  const appConfig = getAppConfig();
+  return new AppError(appConfig.error.messages.userAuthFail, 401);
+};
 
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
@@ -21,20 +33,21 @@ const sendErrorProd = (err, res) => {
     console.log(`Error: ${err}`);
     res.status(err.statusCode).json({
       status: 'error',
-      message: 'Sth went wong'
+      message: 'Sorry, something went wrong...'
     });
   }
 };
 
 const handleProdError = (err, req, res) => {
   if (err.name === 'TokenExpiredError') err = handleJwtExpired();
+  else if (err.name === 'JsonWebTokenError') err = handleJwtError();
   sendErrorProd(err, res);
 };
 
 exports.globalErrorHandler = (err, req, res, next) => {
   err.statusCode ??= 500;
   err.status ??= 'Error';
-  process.env.NODE_ENV === 'developement'
+  process.env.NODE_ENV === 'developement' //changed
     ? sendErrorDev(err, res)
     : handleProdError(err, req, res);
 };

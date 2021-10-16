@@ -1,3 +1,4 @@
+'use strict';
 const { catchAsync, AppError } = require('../error');
 const { checkDb, checkDbInternal } = require('../utils');
 

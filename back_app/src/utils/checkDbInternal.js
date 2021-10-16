@@ -1,3 +1,4 @@
+'use strict';
 const dbPool = require('../db');
 const { catchAsync, AppError } = require('../error');
 

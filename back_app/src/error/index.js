@@ -1,3 +1,4 @@
+'use strict';
 const { catchAsync } = require('./asyncFunction');
 const AppError = require('./appError');
 const { globalErrorHandler } = require('./errorsController');

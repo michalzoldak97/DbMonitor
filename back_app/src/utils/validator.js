@@ -1,3 +1,4 @@
+'use strict';
 exports.isValidEmail = email => {
   const pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   if (email.match(pattern)) {

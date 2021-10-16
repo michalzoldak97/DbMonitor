@@ -1,3 +1,4 @@
+'use strict';
 const { catchAsync, AppError } = require('../error');
 const bcrypt = require('bcrypt');
 const userModel = require('./userModel');
