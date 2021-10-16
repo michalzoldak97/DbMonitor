@@ -78,8 +78,15 @@ exports.selectUserPermissions = async id => {
   return await dbPool.singleQuery(queryText, [id]);
 };
 
-exports.selectUserSetUp = async id => {
+exports.selectMySetUp = async id => {
   const queryText = 'SELECT * FROM app.sp_user_settings($1)';
   const { rows } = await dbPool.singleQuery(queryText, [id]);
+  return rows;
+};
+
+exports.selectUserSetUp = async (myId, usrId) => {
+  const queryText = `SELECT a.* FROM app.sp_user_settings($1) a 
+                     INNER JOIN app.sp_user_settings($2) b ON a.setting::TEXT = b.setting::TEXT`;
+  const { rows } = await dbPool.singleQuery(queryText, [myId, usrId]);
   return rows;
 };

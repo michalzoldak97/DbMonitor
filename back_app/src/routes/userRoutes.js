@@ -9,20 +9,28 @@ router.post('/login', login);
 
 router.use(validateToken);
 
-router.route('/mysetup').get(user.getUserSetup);
+router.get('/mysetup', user.getMySetup);
 
-router
-  .route('/updatePass')
-  .patch(validatePermission('userModify'), user.modifyPass);
+router.get(
+  '/:id/setup',
+  validatePermission('userViewDetail'),
+  user.getUserSetup
+);
+
+router.patch(
+  '/updatePass',
+  validatePermission('userModifyDetail'),
+  user.modifyPass
+);
 
 router
   .route('/')
-  .get(validatePermission('userView'), user.getUserAll)
+  .get(validatePermission('userViewDetail'), user.getUserAll)
   .post(validatePermission('userCreate'), user.createUser);
 
 router
   .route('/:id')
-  .get(validatePermission('userView'), user.getUser)
+  .get(validatePermission('userViewDetail'), user.getUser)
   .delete(validatePermission('userDelete'), user.deleteUser);
 
 module.exports = router;

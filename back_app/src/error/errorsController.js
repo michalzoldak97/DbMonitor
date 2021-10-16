@@ -6,13 +6,13 @@ const getAppConfig = async () => {
   return appConfig;
 };
 
-const handleJwtExpired = () => {
-  const appConfig = getAppConfig();
+const handleJwtExpired = async () => {
+  const appConfig = await getAppConfig();
   return new AppError(appConfig.error.messages.userAuthFail, 401);
 };
-const handleJwtError = () => {
-  const appConfig = getAppConfig();
-  return new AppError(appConfig.error.messages.userAuthFail, 401);
+const handleJwtError = async () => {
+  const appConfig = await getAppConfig();
+  return new AppError(`${appConfig.error.messages.userAuthFail}`, 401);
 };
 
 const sendErrorDev = (err, res) => {
@@ -38,9 +38,9 @@ const sendErrorProd = (err, res) => {
   }
 };
 
-const handleProdError = (err, req, res) => {
-  if (err.name === 'TokenExpiredError') err = handleJwtExpired();
-  else if (err.name === 'JsonWebTokenError') err = handleJwtError();
+const handleProdError = async (err, req, res) => {
+  if (err.name === 'TokenExpiredError') err = await handleJwtExpired();
+  else if (err.name === 'JsonWebTokenError') err = await handleJwtError();
   sendErrorProd(err, res);
 };
 

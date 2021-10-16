@@ -8,6 +8,7 @@ module.exports = {
     getUserAll: user.getUserAll,
     deleteUser: user.deleteUser,
     modifyPass: user.modifyPass,
+    getMySetup: user.getMySetup,
     getUserSetup: user.getUserSetup
   }
 };

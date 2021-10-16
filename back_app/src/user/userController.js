@@ -65,15 +65,16 @@ exports.createUser = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteUser = catchAsync(async (req, res, next) => {
+  const appConfig = await getAppConfig();
   const qConfig = {
     id: 'user_id',
     toChange: 'deactivated_datetime',
     val: new Date(Date.now()),
     condition: req.params.id
   };
-  changedUsers = await userModel.updateUser(qConfig);
+  const changedUsers = await userModel.updateUser(qConfig);
   if (!changedUsers)
-    return next(new AppError('appConfig.error.messages.userNotFound'), 404);
+    return next(new AppError(`${appConfig.error.messages.userNotFound}`, 404));
   res.status(200).json({
     message: 'success',
     data: {
@@ -83,6 +84,7 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
 });
 
 exports.modifyPass = catchAsync(async (req, res, next) => {
+  const appConfig = await getAppConfig();
   const newPass = await bcrypt.hash(req.body.newPassword, 12);
   const qConfig = {
     id: 'user_id',
@@ -90,9 +92,9 @@ exports.modifyPass = catchAsync(async (req, res, next) => {
     val: newPass,
     condition: req.body.id
   };
-  changedUsers = await userModel.updateUser(qConfig);
+  const changedUsers = await userModel.updateUser(qConfig);
   if (!changedUsers)
-    return next(new AppError('appConfig.error.messages.userNotFound'), 404);
+    return next(new AppError(`${appConfig.error.messages.userNotFound}`, 404));
   res.status(200).json({
     message: 'success',
     data: {
@@ -101,10 +103,24 @@ exports.modifyPass = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getUserSetup = catchAsync(async (req, res, next) => {
-  const usrSetUp = await userModel.selectUserSetUp(req.user.id);
+exports.getMySetup = catchAsync(async (req, res, next) => {
+  const appConfig = await getAppConfig();
+  const usrSetUp = await userModel.selectMySetUp(req.user.id);
   if (!usrSetUp)
-    return next(new AppError('appConfig.error.messages.userNotFound'), 404);
+    return next(new AppError(`${appConfig.error.messages.userNotFound}`, 404));
+  res.status(200).json({
+    message: 'success',
+    data: {
+      usrSetUp
+    }
+  });
+});
+
+exports.getUserSetup = catchAsync(async (req, res, next) => {
+  const appConfig = await getAppConfig();
+  const usrSetUp = await userModel.selectUserSetUp(req.user.id, req.params.id);
+  if (!usrSetUp)
+    return next(new AppError(`${appConfig.error.messages.userNotFound}`, 404));
   res.status(200).json({
     message: 'success',
     data: {
