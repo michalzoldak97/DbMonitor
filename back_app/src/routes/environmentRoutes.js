@@ -13,6 +13,13 @@ router.get(
 
 router
   .route('/:id')
-  .get(validatePermission('envView'), envController.getEnvironment);
+  .get(validatePermission('envView'), envController.getEnvironment)
+  .patch(validatePermission('envModify'), envController.modifyEnvironment);
+
+router.post(
+  '/',
+  validatePermission('envCreate'),
+  envController.createEnvironment
+);
 
 module.exports = router;

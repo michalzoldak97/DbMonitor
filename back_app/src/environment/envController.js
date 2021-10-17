@@ -46,3 +46,33 @@ exports.getEnvironmentAll = catchAsync(async (req, res, next) => {
     }
   });
 });
+
+exports.createEnvironment = catchAsync(async (req, res, next) => {
+  const appConfig = await getAppConfig();
+  const newEnv = await envModel.insertEnv(req);
+  if (!newEnv)
+    return next(
+      new AppError(`${appConfig.error.messages.envOperationFail}`, 500)
+    );
+  res.status(201).json({
+    message: 'success',
+    data: {
+      newEnv
+    }
+  });
+});
+
+exports.modifyEnvironment = catchAsync(async (req, res, next) => {
+  const appConfig = await getAppConfig();
+  const updatedEnv = await envModel.updateEnv(req);
+  if (!updatedEnv)
+    return next(
+      new AppError(`${appConfig.error.messages.envOperationFail}`, 500)
+    );
+  res.status(201).json({
+    message: 'success',
+    data: {
+      updatedEnv
+    }
+  });
+});

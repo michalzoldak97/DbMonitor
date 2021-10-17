@@ -42,7 +42,9 @@ CREATE TABLE app.tbl_environment(
    pg_password VARCHAR(255) NOT NULL,
    created_by_user_id BIGSERIAL REFERENCES usr.tbl_user (user_id),
    created_datetime TIMESTAMP DEFAULT NOW(),
-   deactivated_datetime TIMESTAMP
+   deactivated_datetime TIMESTAMP,
+   last_updated_by_user_id BIGINT REFERENCES usr.tbl_user (user_id),
+   last_updated_datetime TIMESTAMP 
 )
 ;
  
@@ -133,4 +135,81 @@ CREATE INDEX idx_user_query_user ON usr.tbl_user_query (user_id)
 ;
 
 CREATE INDEX idx_query_param_query ON app.tbl_query_parameter (query_id)
+;
+
+CREATE OR REPLACE FUNCTION app.sp_user_settings(usr_id BIGINT)
+RETURNS TABLE (setting JSON) AS
+$$
+BEGIN
+DROP TABLE IF EXISTS tbl_user_setting_json;
+CREATE TEMPORARY TABLE tbl_user_setting_json(
+    setting JSON
+);
+INSERT INTO tbl_user_setting_json (setting)
+SELECT row_to_json(a) FROM (
+                            SELECT 
+                                'permission'::VARCHAR AS set_type
+                                ,up.permission_id  
+                                ,p.permission_name
+                            FROM usr.tbl_permission p
+                            INNER JOIN usr.tbl_user_permission up              ON p.permission_id = up.permission_id
+                            WHERE 
+                                p.deactivated_datetime IS NULL
+                                AND up.user_id = usr_id
+    
+) a;
+INSERT INTO tbl_user_setting_json (setting)
+SELECT row_to_json(a) FROM (
+                            SELECT 
+                                'environment'::VARCHAR AS set_type
+                                ,ue.environment_id  
+                                ,e.pg_database AS database_name
+                            FROM app.tbl_environment e
+                            INNER JOIN usr.tbl_user_environment ue              ON e.environment_id = ue.environment_id
+                            WHERE 
+                                e.deactivated_datetime IS NULL
+                                AND ue.user_id = usr_id
+) a;
+INSERT INTO tbl_user_setting_json (setting)
+SELECT row_to_json(a) FROM (
+                            SELECT 
+                                'query_set'::VARCHAR AS set_type
+                                ,uqs.query_set_id  
+                                ,qs.query_set_name 
+                            FROM app.tbl_query_set qs
+                            INNER JOIN usr.tbl_user_query_set uqs                ON qs.query_set_id = uqs.query_set_id
+                            WHERE 
+                                qs.deactivated_datetime IS NULL
+                                AND uqs.user_id = usr_id
+) a;
+INSERT INTO tbl_user_setting_json (setting)
+SELECT row_to_json(a) FROM (
+                            SELECT 
+                                'query'::VARCHAR AS set_type
+                                ,uq.query_id 
+                                ,q.query_name
+                            FROM app.tbl_query q
+                            INNER JOIN usr.tbl_user_query uq                ON q.query_id = uq.query_id
+                            WHERE 
+                                q.deactivated_datetime IS NULL
+                                AND uq.user_id = usr_id
+) a;
+RETURN QUERY SELECT usj.setting FROM tbl_user_setting_json usj;
+END;
+$$ LANGUAGE plpgsql
+;
+
+CREATE OR REPLACE FUNCTION app.fn_tr_env_update ()
+RETURNS trigger AS
+$$
+BEGIN
+      NEW.last_updated_datetime = NOW();
+      RETURN NEW;
+END;
+$$ LANGUAGE plpgsql
+;
+
+CREATE TRIGGER tr_env_update
+BEFORE UPDATE ON app.tbl_environment
+FOR EACH ROW EXECUTE PROCEDURE app.fn_tr_env_update()
 ;
