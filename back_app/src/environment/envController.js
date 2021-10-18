@@ -76,3 +76,17 @@ exports.modifyEnvironment = catchAsync(async (req, res, next) => {
     }
   });
 });
+
+exports.assignEnvs = catchAsync(async (req, res, next) => {
+  const assignedEnvs = await envModel.assignEnvs(req);
+  if (!assignedEnvs)
+    return next(
+      new AppError(`${appConfig.error.messages.envOperationFail}`, 500)
+    );
+  res.status(200).json({
+    message: 'success',
+    data: {
+      assignedEnvs
+    }
+  });
+});

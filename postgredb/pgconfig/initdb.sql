@@ -199,12 +199,70 @@ END;
 $$ LANGUAGE plpgsql
 ;
 
+CREATE OR REPLACE FUNCTION usr.tf_user_environment_assign(req_user_id BIGINT, for_user_id BIGINT, envs_param VARCHAR)
+RETURNS BIGINT AS
+$$
+DECLARE 
+    envs BIGINT[] := envs_param::BIGINT[];
+    changed_user_id BIGINT;
+BEGIN
+    IF (EXISTS (
+                SELECT FROM usr.tbl_user_environment ue
+                WHERE 
+                    ue.user_id = req_user_id
+                    AND ue.environment_id = ANY(envs)
+        )
+        AND NOT 
+        EXISTS (
+                SELECT FROM usr.tbl_user_environment ue
+                WHERE 
+                    ue.user_id = for_user_id
+                    AND ue.environment_id = ANY(envs)
+        )
+    )
+    THEN 
+        INSERT INTO usr.tbl_user_environment (user_id, environment_id, granted_by_user_id)
+        SELECT 
+            for_user_id
+            ,e.env
+            ,req_user_id
+        FROM (
+            WITH 
+                ROWS AS (
+                            SELECT UNNEST(envs) AS env
+                )
+            SELECT
+                env
+            FROM ROWS
+        )e;
+        changed_user_id := for_user_id;
+    ELSE 
+        changed_user_id := 0;
+        RAISE EXCEPTION 'Invalid insert attempt or user not permitted';
+    END IF;
+    RETURN changed_user_id;
+END;
+$$ LANGUAGE plpgsql
+;
+
 CREATE OR REPLACE FUNCTION app.fn_tr_env_update ()
 RETURNS trigger AS
 $$
 BEGIN
-      NEW.last_updated_datetime = NOW();
-      RETURN NEW;
+    IF EXISTS (
+                SELECT 
+                FROM usr.tbl_user_environment ue
+                WHERE 
+                    ue.user_id = NEW.last_updated_by_user_id
+                    AND ue.environment_id = NEW.environment_id
+        )
+    THEN 
+        NEW.last_updated_datetime = NOW();
+        RETURN NEW;
+    ELSE
+        RAISE EXCEPTION 'User not authorised';
+        RETURN OLD;
+    END IF;
 END;
 $$ LANGUAGE plpgsql
 ;

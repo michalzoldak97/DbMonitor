@@ -12,6 +12,10 @@ router.get(
 );
 
 router
+  .route('/user')
+  .post(validatePermission('userModifyEnv'), envController.assignEnvs);
+
+router
   .route('/:id')
   .get(validatePermission('envView'), envController.getEnvironment)
   .patch(validatePermission('envModify'), envController.modifyEnvironment);

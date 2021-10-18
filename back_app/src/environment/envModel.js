@@ -80,3 +80,14 @@ exports.updateEnv = async req => {
   const { rowCount } = await dbPool.singleQuery(queryText, queryParams);
   return rowCount;
 };
+
+exports.assignEnvs = async req => {
+  const queryText = `
+  SELECT * FROM usr.tf_user_environment_assign($1, $2, $3)`;
+  const res = await dbPool.singleQuery(queryText, [
+    req.user.id,
+    req.body.user_id,
+    req.body.environments
+  ]);
+  return res;
+};
