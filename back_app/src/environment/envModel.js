@@ -84,10 +84,35 @@ exports.updateEnv = async req => {
 exports.assignEnvs = async req => {
   const queryText = `
   SELECT * FROM usr.tf_user_environment_assign($1, $2, $3)`;
-  const res = await dbPool.singleQuery(queryText, [
+  const { rowCount } = await dbPool.singleQuery(queryText, [
     req.user.id,
     req.body.user_id,
     req.body.environments
   ]);
   return res;
+};
+
+exports.unassignEnvs = async req => {
+  const queryText = pgFormat(
+    `
+  DELETE FROM usr.tbl_user_environment ue
+  WHERE 
+    ue.user_id = $1
+    AND ue.environment_id IN (%L)
+    AND ue.environment_id IN (
+                              SELECT 
+                                  ue.user_environment_id 
+                              FROM usr.tbl_user_environment ue
+                              WHERE 
+                                  ue.user_id = $2
+  )`,
+    Array.from(req.body.environments)
+      .filter(Number)
+      .map(num => parseInt(num, 10))
+  );
+  const { rowCount } = await dbPool.singleQuery(queryText, [
+    req.body.user_id,
+    req.user.id
+  ]);
+  return rowCount;
 };

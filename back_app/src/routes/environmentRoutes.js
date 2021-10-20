@@ -13,7 +13,8 @@ router.get(
 
 router
   .route('/user')
-  .post(validatePermission('userModifyEnv'), envController.assignEnvs);
+  .post(validatePermission('userModifyEnv'), envController.assignEnvs)
+  .delete(validatePermission('userModifyEnv'), envController.unassignEnvs);
 
 router
   .route('/:id')
