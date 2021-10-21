@@ -2,7 +2,6 @@
 const dbPool = require('../db');
 const pgFormat = require('pg-format');
 const bcrypt = require('bcrypt');
-const { isValidEmail, isValidPasword } = require('../utils');
 
 exports.isCorrectPassword = async (recievedPass, userPass) => {
   return await bcrypt.compare(recievedPass, userPass);
@@ -35,16 +34,6 @@ exports.selectUsers = async config => {
 };
 
 exports.insertUser = async req => {
-  if (
-    !req.body.creatingUserId ||
-    !isValidPasword(req.body.password) ||
-    !isValidEmail(req.body.email)
-  ) {
-    return {
-      status: 'error',
-      message: 'Incorrect user data'
-    };
-  }
   const encryptedPass = await bcrypt.hash(req.body.password, 12);
   const queryText = `INSERT INTO usr.tbl_user(email, password, created_by_user_id)
                      VALUES ($1, $2, $3)`;

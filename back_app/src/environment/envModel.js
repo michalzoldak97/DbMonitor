@@ -89,7 +89,7 @@ exports.assignEnvs = async req => {
     req.body.user_id,
     req.body.environments
   ]);
-  return res;
+  return rowCount;
 };
 
 exports.unassignEnvs = async req => {
@@ -101,7 +101,7 @@ exports.unassignEnvs = async req => {
     AND ue.environment_id IN (%L)
     AND ue.environment_id IN (
                               SELECT 
-                                  ue.user_environment_id 
+                                  ue.environment_id 
                               FROM usr.tbl_user_environment ue
                               WHERE 
                                   ue.user_id = $2

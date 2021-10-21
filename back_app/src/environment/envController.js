@@ -1,25 +1,7 @@
 'use strict';
 const envModel = require('./envModel');
-const { catchAsync, AppError } = require('../error');
-
-const getAppConfig = async () => {
-  const { appConfig } = await require('../utils/config');
-  return appConfig;
-};
-
-const responseHandler = async (obj, conf, res, next) => {
-  const appConfig = await getAppConfig();
-  if (!obj.head)
-    return next(
-      new AppError(`${appConfig.error.messages[conf.errMessage]}`, conf.errCode)
-    );
-  res.status(conf.sCode).json({
-    message: 'success',
-    response: {
-      data: obj.data
-    }
-  });
-};
+const { catchAsync } = require('../error');
+const { responseHandler } = require('../utils');
 
 exports.getEnvironment = catchAsync(async (req, res, next) => {
   const getConfig = {
@@ -28,7 +10,7 @@ exports.getEnvironment = catchAsync(async (req, res, next) => {
     usr_id: req.user.id
   };
   const env = await envModel.selectEnv(getConfig);
-  responseHandler(
+  responseHandler.respond(
     { head: env[0], data: env },
     { sCode: 200, errCode: 500, errMessage: 'envOperationFail' },
     res,
@@ -37,72 +19,53 @@ exports.getEnvironment = catchAsync(async (req, res, next) => {
 });
 
 exports.getEnvironmentAll = catchAsync(async (req, res, next) => {
-  const appConfig = await getAppConfig();
   const getConfig = {
     condition: 'AND 1',
     env_id: 1,
     usr_id: req.user.id
   };
   const envs = await envModel.selectEnv(getConfig);
-  if (!envs[0])
-    return next(
-      new AppError(`${appConfig.error.messages.envOperationFail}`, 500)
-    );
-  res.status(200).json({
-    message: 'success',
-    data: {
-      envs
-    }
-  });
+  responseHandler.respond(
+    { head: envs[0], data: envs },
+    { sCode: 200, errCode: 500, errMessage: 'envOperationFail' },
+    res,
+    next
+  );
 });
 
 exports.createEnvironment = catchAsync(async (req, res, next) => {
-  const appConfig = await getAppConfig();
   const newEnv = await envModel.insertEnv(req);
-  if (!newEnv)
-    return next(
-      new AppError(`${appConfig.error.messages.envOperationFail}`, 500)
-    );
-  res.status(201).json({
-    message: 'success',
-    data: {
-      newEnv
-    }
-  });
+  responseHandler.respond(
+    { head: newEnv, data: newEnv },
+    { sCode: 201, errCode: 500, errMessage: 'envOperationFail' },
+    res,
+    next
+  );
 });
 
 exports.modifyEnvironment = catchAsync(async (req, res, next) => {
-  const appConfig = await getAppConfig();
   const updatedEnv = await envModel.updateEnv(req);
-  if (!updatedEnv)
-    return next(
-      new AppError(`${appConfig.error.messages.envOperationFail}`, 500)
-    );
-  res.status(201).json({
-    message: 'success',
-    data: {
-      updatedEnv
-    }
-  });
+  responseHandler.respond(
+    { head: updatedEnv, data: updatedEnv },
+    { sCode: 200, errCode: 500, errMessage: 'envOperationFail' },
+    res,
+    next
+  );
 });
 
 exports.assignEnvs = catchAsync(async (req, res, next) => {
   const assignedEnvs = await envModel.assignEnvs(req);
-  if (!assignedEnvs)
-    return next(
-      new AppError(`${appConfig.error.messages.envOperationFail}`, 500)
-    );
-  res.status(200).json({
-    message: 'success',
-    data: {
-      assignedEnvs
-    }
-  });
+  responseHandler.respond(
+    { head: assignedEnvs, data: assignedEnvs },
+    { sCode: 200, errCode: 500, errMessage: 'envOperationFail' },
+    res,
+    next
+  );
 });
 
 exports.unassignEnvs = catchAsync(async (req, res, next) => {
   const unassignedEnvs = await envModel.unassignEnvs(req);
-  responseHandler(
+  responseHandler.respond(
     { head: unassignedEnvs, data: unassignedEnvs },
     { sCode: 200, errCode: 500, errMessage: 'envOperationFail' },
     res,
