@@ -44,9 +44,9 @@ exports.createQuery = catchAsync(async (req, res, next) => {
 });
 
 exports.modifyQuery = catchAsync(async (req, res, next) => {
-  const updatedEnv = await queryModel.updateEnv(req);
+  const updatedQuery = await queryModel.updateQuery(req);
   responseHandler.respond(
-    { head: updatedEnv, data: updatedEnv },
+    { head: updatedQuery, data: updatedQuery },
     { sCode: 200, errCode: 500, errMessage: 'qOperationFail' },
     res,
     next

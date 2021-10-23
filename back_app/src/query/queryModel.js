@@ -47,3 +47,24 @@ exports.insertQuery = async req => {
     }
   };
 };
+
+exports.updateQuery = async req => {
+  const queryText = `
+  UPDATE app.tbl_query q
+  SET 
+    query_name = $1
+    ,query_description = $2
+    ,query_text = $3
+    ,last_updated_by_user_id = $4
+  WHERE
+    q.query_id = $5`;
+  const queryParams = [
+    req.body.query_name,
+    req.body.query_description,
+    req.body.query_text,
+    req.user.id,
+    req.params.id
+  ];
+  const { rowCount } = await dbPool.singleQuery(queryText, queryParams);
+  return rowCount;
+};

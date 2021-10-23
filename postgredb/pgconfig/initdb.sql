@@ -299,7 +299,10 @@ BEGIN
     THEN 
         NEW.last_updated_datetime = NOW();
         RETURN NEW;
-    ELSEIF NEW.deactivated_datetime IS NOT NULL
+    ELSEIF (
+            NEW.deactivated_datetime IS NOT NULL 
+            AND NEW.last_updated_datetime <= NEW.deactivated_datetime
+            )
     THEN
         NEW.last_updated_datetime = NOW();
         RETURN NEW;
@@ -347,7 +350,10 @@ BEGIN
     THEN 
         NEW.last_updated_datetime = NOW();
         RETURN NEW;
-    ELSEIF NEW.deactivated_datetime IS NOT NULL
+    ELSEIF (
+            NEW.deactivated_datetime IS NOT NULL 
+            AND NEW.last_updated_datetime <= NEW.deactivated_datetime
+            )
     THEN
         NEW.last_updated_datetime = NOW();
         RETURN NEW;

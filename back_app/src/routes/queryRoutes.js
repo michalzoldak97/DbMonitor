@@ -13,6 +13,9 @@ router.post('/', validatePermission('qCreate'), queryController.createQuery);
 //   .post(validatePermission('userModifyEnv'), queryController.assignEnvs)
 //   .delete(validatePermission('userModifyEnv'), queryController.unassignEnvs);
 
-router.route('/:id').get(validatePermission('qView'), queryController.getQuery);
+router
+  .route('/:id')
+  .get(validatePermission('qView'), queryController.getQuery)
+  .patch(validatePermission('qModify'), queryController.modifyQuery);
 
 module.exports = router;
