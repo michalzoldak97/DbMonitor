@@ -88,3 +88,28 @@ exports.assignQueries = async req => {
   ]);
   return rowCount;
 };
+
+exports.unassignQueries = async req => {
+  const queryText = pgFormat(
+    `
+  DELETE FROM usr.tbl_user_query uq
+  WHERE 
+    uq.user_id = $1
+    AND uq.query_id IN (%L)
+    AND uq.query_id IN (
+                              SELECT 
+                                uq.query_id 
+                              FROM usr.tbl_user_query uq
+                              WHERE 
+                                uq.user_id = $2
+  )`,
+    Array.from(req.body.queries)
+      .filter(Number)
+      .map(num => parseInt(num, 10))
+  );
+  const { rowCount } = await dbPool.singleQuery(queryText, [
+    req.body.user_id,
+    req.user.id
+  ]);
+  return rowCount;
+};

@@ -10,8 +10,11 @@ router.post('/', validatePermission('qCreate'), queryController.createQuery);
 
 router
   .route('/user')
-  .post(validatePermission('userModifyQuery'), queryController.assignQueries);
-//   .delete(validatePermission('userModifyEnv'), queryController.unassignEnvs);
+  .post(validatePermission('userModifyQuery'), queryController.assignQueries)
+  .delete(
+    validatePermission('userModifyQuery'),
+    queryController.unassignQueries
+  );
 
 router
   .route('/:id')

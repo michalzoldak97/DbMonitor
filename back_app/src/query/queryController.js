@@ -77,7 +77,7 @@ exports.assignQueries = catchAsync(async (req, res, next) => {
 });
 
 exports.unassignQueries = catchAsync(async (req, res, next) => {
-  const unassignedQueries = await queryModel.unassignEnvs(req);
+  const unassignedQueries = await queryModel.unassignQueries(req);
   responseHandler.respond(
     { head: unassignedQueries, data: unassignedQueries },
     { sCode: 200, errCode: 500, errMessage: 'qOperationFail' },
