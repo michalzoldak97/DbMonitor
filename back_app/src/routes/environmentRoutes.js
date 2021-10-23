@@ -10,6 +10,11 @@ router.get(
   validatePermission('envView'),
   envController.getEnvironmentAll
 );
+router.post(
+  '/',
+  validatePermission('envCreate'),
+  envController.createEnvironment
+);
 
 router
   .route('/user')
@@ -19,12 +24,7 @@ router
 router
   .route('/:id')
   .get(validatePermission('envView'), envController.getEnvironment)
-  .patch(validatePermission('envModify'), envController.modifyEnvironment);
-
-router.post(
-  '/',
-  validatePermission('envCreate'),
-  envController.createEnvironment
-);
+  .patch(validatePermission('envModify'), envController.modifyEnvironment)
+  .delete(validatePermission('envDelete'), envController.deleteEnv);
 
 module.exports = router;

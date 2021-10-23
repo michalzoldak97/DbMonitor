@@ -199,6 +199,39 @@ END;
 $$ LANGUAGE plpgsql
 ;
 
+CREATE OR REPLACE FUNCTION app.tf_environment_deactivate(env_to_deactivate_id BIGINT, requesting_user_id BIGINT)
+RETURNS BIGINT AS
+$$
+DECLARE
+    changed_id BIGINT = 0;
+BEGIN
+    IF EXISTS (
+                SELECT FROM usr.tbl_user_environment ue
+                WHERE 
+                    ue.user_id = requesting_user_id
+                    AND ue.environment_id = env_to_deactivate_id
+    )
+    THEN
+        UPDATE app.tbl_environment e 
+        SET
+            deactivated_datetime = NOW()
+            ,last_updated_by_user_id = requesting_user_id
+        WHERE 
+            e.environment_id = env_to_deactivate_id
+        ;
+        DELETE FROM usr.tbl_user_environment ue
+        WHERE 
+            ue.environment_id = env_to_deactivate_id
+        ;
+        changed_id := env_to_deactivate_id;
+    ELSE
+        RAISE EXCEPTION 'User not permitted';
+    END IF;
+    RETURN changed_id;
+END;
+$$ LANGUAGE plpgsql
+;
+
 CREATE OR REPLACE FUNCTION usr.tf_user_environment_assign(req_user_id BIGINT, for_user_id BIGINT, envs_param VARCHAR)
 RETURNS BIGINT AS
 $$
@@ -218,6 +251,13 @@ BEGIN
                 WHERE 
                     ue.user_id = for_user_id
                     AND ue.environment_id = ANY(envs)
+        )
+        AND NOT
+        EXISTS (
+                SELECT FROM app.tbl_environment e
+                WHERE 
+                    e.environment_id  = ANY(envs)
+                    AND e.deactivated_datetime IS NOT NULL
         )
     )
     THEN 
@@ -259,6 +299,10 @@ BEGIN
     THEN 
         NEW.last_updated_datetime = NOW();
         RETURN NEW;
+    ELSEIF NEW.deactivated_datetime IS NOT NULL
+    THEN
+        NEW.last_updated_datetime = NOW();
+        RETURN NEW;
     ELSE
         RAISE EXCEPTION 'User not authorised';
         RETURN OLD;
@@ -270,4 +314,21 @@ $$ LANGUAGE plpgsql
 CREATE TRIGGER tr_env_update
 BEFORE UPDATE ON app.tbl_environment
 FOR EACH ROW EXECUTE PROCEDURE app.fn_tr_env_update()
+;
+
+CREATE OR REPLACE FUNCTION app.fn_tr_env_create ()
+RETURNS trigger AS
+$$
+BEGIN
+    INSERT INTO usr.tbl_user_environment (user_id, environment_id, granted_by_user_id)
+    VALUES
+        (NEW.created_by_user_id, NEW.environment_id, NEW.created_by_user_id);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql
+;
+
+CREATE TRIGGER tr_env_create
+AFTER INSERT ON app.tbl_environment
+FOR EACH ROW EXECUTE PROCEDURE app.fn_tr_env_create()
 ;

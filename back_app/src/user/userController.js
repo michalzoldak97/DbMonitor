@@ -1,5 +1,5 @@
 'use strict';
-const { catchAsync, AppError } = require('../error');
+const { catchAsync } = require('../error');
 const bcrypt = require('bcrypt');
 const userModel = require('./userModel');
 const { responseHandler, isValidEmail, isValidPasword } = require('../utils');

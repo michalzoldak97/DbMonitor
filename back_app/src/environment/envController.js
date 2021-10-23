@@ -53,6 +53,16 @@ exports.modifyEnvironment = catchAsync(async (req, res, next) => {
   );
 });
 
+exports.deleteEnv = catchAsync(async (req, res, next) => {
+  const deletedEnv = await envModel.deactivateEnv(req.params.id, req.user.id);
+  responseHandler.respondEmpty(
+    { head: deletedEnv },
+    { sCode: 204, errCode: 500, errMessage: 'envOperationFail' },
+    res,
+    next
+  );
+});
+
 exports.assignEnvs = catchAsync(async (req, res, next) => {
   const assignedEnvs = await envModel.assignEnvs(req);
   responseHandler.respond(

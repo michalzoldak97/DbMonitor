@@ -34,7 +34,7 @@ exports.insertEnv = async req => {
   const queryText = `
   INSERT INTO app.tbl_environment (environment_ssh_host, environment_ssh_username, environment_ssh_priv_key, environment_ssh_passphrase, pg_host, pg_database, pg_username, pg_password, created_by_user_id)
   VALUES
-  ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
   const queryParams = [
     req.body.env_ssh_host,
     req.body.env_ssh_username,
@@ -47,7 +47,20 @@ exports.insertEnv = async req => {
     req.user.id
   ];
   const { rowCount } = await dbPool.singleQuery(queryText, queryParams);
-  return rowCount;
+  if (!rowCount) return rowCount;
+  return {
+    created: rowCount,
+    newEnv: {
+      env_ssh_host: req.body.env_ssh_host,
+      env_ssh_username: req.body.env_ssh_username,
+      env_ssh_priv_key: req.body.env_ssh_priv_key,
+      env_ssh_pass: req.body.env_ssh_pass,
+      pg_host: req.body.pg_host,
+      pg_db: req.body.pg_db,
+      pg_username: req.body.pg_username,
+      pg_pass: req.body.pg_pass
+    }
+  };
 };
 
 exports.updateEnv = async req => {
@@ -79,6 +92,15 @@ exports.updateEnv = async req => {
   ];
   const { rowCount } = await dbPool.singleQuery(queryText, queryParams);
   return rowCount;
+};
+
+exports.deactivateEnv = async (env_id, usr_id) => {
+  const queryText = `
+  SELECT * FROM app.tf_environment_deactivate($1, $2)
+  `;
+  const queryParams = [env_id, usr_id];
+  const { rows } = await dbPool.singleQuery(queryText, queryParams);
+  return rows;
 };
 
 exports.assignEnvs = async req => {
