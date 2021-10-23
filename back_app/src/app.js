@@ -2,7 +2,12 @@
 const express = require('express');
 
 const { AppError, globalErrorHandler } = require('./error');
-const { processRouter, userRouter, environmentRouter } = require('./routes');
+const {
+  processRouter,
+  userRouter,
+  environmentRouter,
+  queryRouter
+} = require('./routes');
 const { validateToken } = require('./auth');
 
 const app = express();
@@ -14,6 +19,8 @@ app.use('/api/v1/user', userRouter);
 app.use(validateToken);
 
 app.use('/api/v1/environment', environmentRouter);
+
+app.use('/api/v1/query', queryRouter);
 
 app.use('/api/v1/process', processRouter);
 
