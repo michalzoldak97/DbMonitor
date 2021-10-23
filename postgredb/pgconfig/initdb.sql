@@ -340,6 +340,39 @@ AFTER INSERT ON app.tbl_environment
 FOR EACH ROW EXECUTE PROCEDURE app.fn_tr_env_create()
 ;
 
+CREATE OR REPLACE FUNCTION app.tf_query_deactivate(q_to_deactivate_id BIGINT, requesting_user_id BIGINT)
+RETURNS BIGINT AS
+$$
+DECLARE
+    changed_id BIGINT = 0;
+BEGIN
+    IF EXISTS (
+                SELECT FROM usr.tbl_user_query uq
+                WHERE 
+                    uq.user_id = requesting_user_id
+                    AND uq.query_id = q_to_deactivate_id
+    )
+    THEN
+        UPDATE app.tbl_query q
+        SET
+            deactivated_datetime = NOW()
+            ,last_updated_by_user_id = requesting_user_id
+        WHERE 
+            q.query_id = q_to_deactivate_id
+        ;
+        DELETE FROM usr.tbl_user_query uq
+        WHERE 
+            uq.query_id = q_to_deactivate_id
+        ;
+        changed_id := q_to_deactivate_id;
+    ELSE
+        RAISE EXCEPTION 'User not permitted';
+    END IF;
+    RETURN changed_id;
+END;
+$$ LANGUAGE plpgsql
+;
+
 CREATE OR REPLACE FUNCTION app.fn_tr_q_update ()
 RETURNS trigger AS
 $$

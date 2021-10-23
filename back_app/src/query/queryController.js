@@ -53,10 +53,13 @@ exports.modifyQuery = catchAsync(async (req, res, next) => {
   );
 });
 
-exports.deleteEnv = catchAsync(async (req, res, next) => {
-  const deletedEnv = await queryModel.deactivateEnv(req.params.id, req.user.id);
+exports.deleteQuery = catchAsync(async (req, res, next) => {
+  const deletedQuery = await queryModel.deactivateQuery(
+    req.params.id,
+    req.user.id
+  );
   responseHandler.respondEmpty(
-    { head: deletedEnv },
+    { head: deletedQuery },
     { sCode: 204, errCode: 500, errMessage: 'qOperationFail' },
     res,
     next

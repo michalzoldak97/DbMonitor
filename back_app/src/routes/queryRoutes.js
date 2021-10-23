@@ -16,6 +16,7 @@ router.post('/', validatePermission('qCreate'), queryController.createQuery);
 router
   .route('/:id')
   .get(validatePermission('qView'), queryController.getQuery)
-  .patch(validatePermission('qModify'), queryController.modifyQuery);
+  .patch(validatePermission('qModify'), queryController.modifyQuery)
+  .delete(validatePermission('qDelete'), queryController.deleteQuery);
 
 module.exports = router;

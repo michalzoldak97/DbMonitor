@@ -68,3 +68,12 @@ exports.updateQuery = async req => {
   const { rowCount } = await dbPool.singleQuery(queryText, queryParams);
   return rowCount;
 };
+
+exports.deactivateQuery = async (q_id, usr_id) => {
+  const queryText = `
+SELECT * FROM app.tf_query_deactivate($1, $2)
+`;
+  const queryParams = [q_id, usr_id];
+  const { rows } = await dbPool.singleQuery(queryText, queryParams);
+  return rows;
+};
