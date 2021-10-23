@@ -333,6 +333,53 @@ AFTER INSERT ON app.tbl_environment
 FOR EACH ROW EXECUTE PROCEDURE app.fn_tr_env_create()
 ;
 
+CREATE OR REPLACE FUNCTION app.fn_tr_q_update ()
+RETURNS trigger AS
+$$
+BEGIN
+    IF EXISTS (
+                SELECT 
+                FROM usr.tbl_user_query uq
+                WHERE 
+                    uq.user_id = NEW.last_updated_by_user_id
+                    AND uq.query_id = NEW.query_id
+        )
+    THEN 
+        NEW.last_updated_datetime = NOW();
+        RETURN NEW;
+    ELSEIF NEW.deactivated_datetime IS NOT NULL
+    THEN
+        NEW.last_updated_datetime = NOW();
+        RETURN NEW;
+    ELSE
+        RAISE EXCEPTION 'User not authorised';
+        RETURN OLD;
+    END IF;
+END;
+$$ LANGUAGE plpgsql
+;
+
+CREATE TRIGGER tr_q_update
+BEFORE UPDATE ON app.tbl_query 
+FOR EACH ROW EXECUTE PROCEDURE app.fn_tr_q_update()
+;
+
+CREATE OR REPLACE FUNCTION app.fn_tr_q_create ()
+RETURNS trigger AS
+$$
+BEGIN
+    INSERT INTO usr.tbl_user_query (user_id, query_id , granted_by_user_id)
+    VALUES
+        (NEW.created_by_user_id, NEW.query_id, NEW.created_by_user_id);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql
+;
+
+CREATE TRIGGER tr_q_create
+AFTER INSERT ON app.tbl_query
+FOR EACH ROW EXECUTE PROCEDURE app.fn_tr_q_create()
+;
 
 INSERT INTO app.tbl_config(config_id, config_json)
 VALUES (1,'

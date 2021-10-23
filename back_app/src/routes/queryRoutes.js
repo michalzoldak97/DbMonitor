@@ -6,7 +6,7 @@ const { validatePermission } = require('../auth');
 const router = express.Router();
 
 router.get('/', validatePermission('qView'), queryController.getQueryAll);
-// router.post('/', validatePermission('envCreate'), queryController.createQuery);
+router.post('/', validatePermission('qCreate'), queryController.createQuery);
 
 // router
 //   .route('/user')

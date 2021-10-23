@@ -24,3 +24,26 @@ exports.selectQuery = async qConf => {
   ]);
   return rows;
 };
+
+exports.insertQuery = async req => {
+  const queryText = `
+    INSERT INTO app.tbl_query (query_name, query_description, query_text, created_by_user_id)
+    VALUES
+      ($1, $2, $3, $4)`;
+  const queryParams = [
+    req.body.query_name,
+    req.body.query_description,
+    req.body.query_text,
+    req.user.id
+  ];
+  const { rowCount } = await dbPool.singleQuery(queryText, queryParams);
+  if (!rowCount) return rowCount;
+  return {
+    created: rowCount,
+    newQuery: {
+      query_name: req.body.query_name,
+      query_description: req.body.query_description,
+      query_text: req.body.query_text
+    }
+  };
+};

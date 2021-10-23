@@ -33,17 +33,17 @@ exports.getQueryAll = catchAsync(async (req, res, next) => {
   );
 });
 
-exports.createEnvironment = catchAsync(async (req, res, next) => {
-  const newEnv = await queryModel.insertEnv(req);
+exports.createQuery = catchAsync(async (req, res, next) => {
+  const newQuery = await queryModel.insertQuery(req);
   responseHandler.respond(
-    { head: newEnv, data: newEnv },
+    { head: newQuery, data: newQuery },
     { sCode: 201, errCode: 500, errMessage: 'qOperationFail' },
     res,
     next
   );
 });
 
-exports.modifyEnvironment = catchAsync(async (req, res, next) => {
+exports.modifyQuery = catchAsync(async (req, res, next) => {
   const updatedEnv = await queryModel.updateEnv(req);
   responseHandler.respond(
     { head: updatedEnv, data: updatedEnv },
