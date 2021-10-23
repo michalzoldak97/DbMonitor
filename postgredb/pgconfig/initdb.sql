@@ -332,3 +332,67 @@ CREATE TRIGGER tr_env_create
 AFTER INSERT ON app.tbl_environment
 FOR EACH ROW EXECUTE PROCEDURE app.fn_tr_env_create()
 ;
+
+
+INSERT INTO app.tbl_config(config_id, config_json)
+VALUES (1,'
+          {
+    "user": {
+        "permissions": {
+            "userCreate": "1",
+            "userDelete": "2",
+            "userModifyDetail": "3",
+            "userViewDetail": "4",
+            "userModifyPermission": "5",
+            "userModifyEnv": "6",
+            "userModifyQuery": "7",
+            "userModifyQuerySet": "8",
+            "envCreate": "9",
+            "envDelete": "10",
+            "envModify": "11",
+            "envView": "12",
+            "qPublic": "13",
+            "qCreate": "14",
+            "qDelete": "15",
+            "qModify": "16",
+            "qView": "17"
+        }
+    },
+    "error": {
+        "messages": {
+            "userNotFound": "User not found",
+            "userCreateFail": "Creating user failed",
+            "userNoPermission": "Operation not permitted",
+            "userIncompleteLoginData": "Mandatory user data missing!",
+            "userInvalidCredentials": "Invalid credentials",
+            "userAuthFail": "User authorization failed",
+            "userPermissionDenied": "Permission denied",
+            "envOperationFail": "Can not perform environment operation",
+            "qNotFound": "Query not found",
+            "qOperationFail": "Can not perform query operation"
+        }
+    }
+}
+  ')
+;
+
+INSERT INTO usr.tbl_permission (permission_id, permission_name)
+VALUES
+    (1, 'Create User')
+    ,(2, 'Delete User')
+    ,(3, 'Modify User Details')
+    ,(4, 'View User Details')
+    ,(5, 'Modify User Permissions')
+    ,(6, 'Modify User Environments')
+    ,(7, 'Modify User Queries')
+    ,(8, 'Modify User Query Sets')
+    ,(9, 'Create Environment')
+    ,(10, 'Delete Environment')
+    ,(11, 'Modify Environment')
+    ,(12, 'View Environment')
+    ,(13, 'Access Public Queries')
+    ,(14, 'Create Query')
+    ,(15, 'Delete Query')
+    ,(16, 'Modify Query')
+    ,(17, 'View Query')
+;
