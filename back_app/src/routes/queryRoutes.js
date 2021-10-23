@@ -8,9 +8,9 @@ const router = express.Router();
 router.get('/', validatePermission('qView'), queryController.getQueryAll);
 router.post('/', validatePermission('qCreate'), queryController.createQuery);
 
-// router
-//   .route('/user')
-//   .post(validatePermission('userModifyEnv'), queryController.assignEnvs)
+router
+  .route('/user')
+  .post(validatePermission('userModifyQuery'), queryController.assignQueries);
 //   .delete(validatePermission('userModifyEnv'), queryController.unassignEnvs);
 
 router

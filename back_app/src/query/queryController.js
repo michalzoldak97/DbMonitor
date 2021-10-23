@@ -66,20 +66,20 @@ exports.deleteQuery = catchAsync(async (req, res, next) => {
   );
 });
 
-exports.assignEnvs = catchAsync(async (req, res, next) => {
-  const assignedEnvs = await queryModel.assignEnvs(req);
+exports.assignQueries = catchAsync(async (req, res, next) => {
+  const assignedQueries = await queryModel.assignQueries(req);
   responseHandler.respond(
-    { head: assignedEnvs, data: assignedEnvs },
+    { head: assignedQueries, data: assignedQueries },
     { sCode: 200, errCode: 500, errMessage: 'qOperationFail' },
     res,
     next
   );
 });
 
-exports.unassignEnvs = catchAsync(async (req, res, next) => {
-  const unassignedEnvs = await queryModel.unassignEnvs(req);
+exports.unassignQueries = catchAsync(async (req, res, next) => {
+  const unassignedQueries = await queryModel.unassignEnvs(req);
   responseHandler.respond(
-    { head: unassignedEnvs, data: unassignedEnvs },
+    { head: unassignedQueries, data: unassignedQueries },
     { sCode: 200, errCode: 500, errMessage: 'qOperationFail' },
     res,
     next

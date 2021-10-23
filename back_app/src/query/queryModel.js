@@ -77,3 +77,14 @@ SELECT * FROM app.tf_query_deactivate($1, $2)
   const { rows } = await dbPool.singleQuery(queryText, queryParams);
   return rows;
 };
+
+exports.assignQueries = async req => {
+  const queryText = `
+  SELECT * FROM usr.tf_user_query_assign($1, $2, $3)`;
+  const { rowCount } = await dbPool.singleQuery(queryText, [
+    req.user.id,
+    req.body.user_id,
+    req.body.queries
+  ]);
+  return rowCount;
+};

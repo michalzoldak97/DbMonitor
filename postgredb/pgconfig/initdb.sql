@@ -373,6 +373,59 @@ END;
 $$ LANGUAGE plpgsql
 ;
 
+CREATE OR REPLACE FUNCTION usr.tf_user_query_assign(req_user_id BIGINT, for_user_id BIGINT, queries_param VARCHAR)
+RETURNS BIGINT AS
+$$
+DECLARE 
+    queries BIGINT[] := queries_param::BIGINT[];
+    changed_user_id BIGINT;
+BEGIN
+    IF (EXISTS (
+                SELECT FROM usr.tbl_user_query uq
+                WHERE 
+                    uq.user_id = req_user_id
+                    AND uq.query_id = ANY(queries)
+        )
+        AND NOT 
+        EXISTS (
+                SELECT FROM usr.tbl_user_query uq
+                WHERE 
+                    uq.user_id = for_user_id
+                    AND uq.query_id = ANY(queries)
+        )
+        AND NOT
+        EXISTS (
+                SELECT FROM app.tbl_query q
+                WHERE 
+                    q.query_id  = ANY(queries)
+                    AND q.deactivated_datetime IS NOT NULL
+        )
+    )
+    THEN 
+        INSERT INTO usr.tbl_user_query (user_id, query_id, granted_by_user_id)
+        SELECT 
+            for_user_id
+            ,q.query
+            ,req_user_id
+        FROM (
+            WITH 
+                ROWS AS (
+                            SELECT UNNEST(queries) AS query
+                )
+            SELECT
+                query
+            FROM ROWS
+        )q;
+        changed_user_id := for_user_id;
+    ELSE 
+        changed_user_id := 0;
+        RAISE EXCEPTION 'Invalid insert attempt or user not permitted';
+    END IF;
+    RETURN changed_user_id;
+END;
+$$ LANGUAGE plpgsql
+;
+
 CREATE OR REPLACE FUNCTION app.fn_tr_q_update ()
 RETURNS trigger AS
 $$
