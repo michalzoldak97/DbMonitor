@@ -53,7 +53,9 @@ CREATE TABLE app.tbl_query_set(
     query_set_name VARCHAR(255) NOT NULL,
     created_by_user_id BIGSERIAL REFERENCES usr.tbl_user (user_id),
     created_datetime TIMESTAMP DEFAULT NOW(),
-    deactivated_datetime TIMESTAMP
+    deactivated_datetime TIMESTAMP,
+    last_updated_by_user_id BIGINT REFERENCES usr.tbl_user (user_id),
+    last_updated_datetime TIMESTAMP
 )
 ;
 
@@ -64,7 +66,9 @@ CREATE TABLE app.tbl_query(
     query_text VARCHAR,
     created_by_user_id BIGSERIAL REFERENCES usr.tbl_user (user_id),
     created_datetime TIMESTAMP DEFAULT NOW(),
-    deactivated_datetime TIMESTAMP
+    deactivated_datetime TIMESTAMP,
+    last_updated_by_user_id BIGINT REFERENCES usr.tbl_user (user_id),
+    last_updated_datetime TIMESTAMP
 )
 ;
  
