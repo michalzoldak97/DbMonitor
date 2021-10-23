@@ -5,11 +5,7 @@ const { validatePermission } = require('../auth');
 
 const router = express.Router();
 
-router.get(
-  '/all',
-  validatePermission('envView'),
-  envController.getEnvironmentAll
-);
+router.get('/', validatePermission('envView'), envController.getEnvironmentAll);
 router.post(
   '/',
   validatePermission('envCreate'),
