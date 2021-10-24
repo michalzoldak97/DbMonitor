@@ -477,6 +477,63 @@ AFTER INSERT ON app.tbl_query
 FOR EACH ROW EXECUTE PROCEDURE app.fn_tr_q_create()
 ;
 
+CREATE OR REPLACE FUNCTION app.sp_environment_query(req_usr_id BIGINT, env_id BIGINT, q_id BIGINT)
+RETURNS JSONB AS
+$$
+BEGIN
+    IF NOT (
+        EXISTS (
+                SELECT FROM usr.tbl_user_environment ue
+                WHERE 
+                    ue.user_id = req_usr_id
+                    AND ue.environment_id = env_id
+            ) 
+        OR 
+        EXISTS (
+                SELECT FROM usr.tbl_user_query uq
+                WHERE 
+                    uq.user_id = req_usr_id
+                    AND uq.query_id = q_id
+        )
+    )
+    THEN 
+        RAISE EXCEPTION 'User not authorised';
+    END IF;
+     RETURN(
+        SELECT 
+            jsonb_build_array(x, xx)
+        FROM(
+                SELECT row_to_json(a) AS environment
+                FROM (
+                      SELECT 
+                        e.environment_ssh_host
+                        ,e.environment_ssh_username
+                        ,e.environment_ssh_priv_key
+                        ,e.environment_ssh_passphrase
+                        ,e.pg_host
+                        ,e.pg_database
+                        ,e.pg_username
+                        ,e.pg_password
+                      FROM app.tbl_environment e
+                      WHERE 
+                        e.environment_id = env_id
+                ) a
+            )x
+        INNER JOIN (
+                SELECT row_to_json(a) AS query
+                FROM (
+                        SELECT
+                            q.query_text
+                        FROM app.tbl_query q
+                        WHERE 
+                            q.query_id = q_id
+                )a
+            )xx                                 ON 1=1
+    );    
+END;
+$$ LANGUAGE plpgsql
+;
+
 INSERT INTO app.tbl_config(config_id, config_json)
 VALUES (1,'
           {

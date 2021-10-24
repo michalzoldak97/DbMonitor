@@ -6,7 +6,8 @@ const {
   processRouter,
   userRouter,
   environmentRouter,
-  queryRouter
+  queryRouter,
+  monitorRouter
 } = require('./routes');
 const { validateToken } = require('./auth');
 
@@ -21,6 +22,8 @@ app.use(validateToken);
 app.use('/api/v1/environment', environmentRouter);
 
 app.use('/api/v1/query', queryRouter);
+
+app.use('/api/v1/monitor', monitorRouter);
 
 app.use('/api/v1/process', processRouter);
 
