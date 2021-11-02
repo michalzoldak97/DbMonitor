@@ -37,6 +37,7 @@ CREATE TABLE app.tbl_environment(
    environment_ssh_priv_key VARCHAR(255) NOT NULL,
    environment_ssh_passphrase VARCHAR(255) NOT NULL,
    pg_host VARCHAR(255) NOT NULL,
+   pg_port VARCHAR(255) NOT NULL,
    pg_database VARCHAR(255) NOT NULL,
    pg_username VARCHAR(255) NOT NULL,
    pg_password VARCHAR(255) NOT NULL,
@@ -511,6 +512,7 @@ BEGIN
                         ,e.environment_ssh_priv_key
                         ,e.environment_ssh_passphrase
                         ,e.pg_host
+                        ,e.pg_port
                         ,e.pg_database
                         ,e.pg_username
                         ,e.pg_password

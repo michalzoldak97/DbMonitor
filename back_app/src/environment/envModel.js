@@ -11,6 +11,7 @@ exports.selectEnv = async qConf => {
       ,e.environment_ssh_priv_key
       ,e.environment_ssh_passphrase
       ,e.pg_host
+      ,e.pg_port
       ,e.pg_database
       ,e.pg_username
       ,e.pg_password
@@ -32,7 +33,7 @@ exports.selectEnv = async qConf => {
 
 exports.insertEnv = async req => {
   const queryText = `
-  INSERT INTO app.tbl_environment (environment_ssh_host, environment_ssh_username, environment_ssh_priv_key, environment_ssh_passphrase, pg_host, pg_database, pg_username, pg_password, created_by_user_id)
+  INSERT INTO app.tbl_environment (environment_ssh_host, environment_ssh_username, environment_ssh_priv_key, environment_ssh_passphrase, pg_host, pg_port, pg_database, pg_username, pg_password, created_by_user_id)
   VALUES
     ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
   const queryParams = [
@@ -41,6 +42,7 @@ exports.insertEnv = async req => {
     req.body.env_ssh_priv_key,
     req.body.env_ssh_pass,
     req.body.pg_host,
+    req.body.pg_port,
     req.body.pg_db,
     req.body.pg_username,
     req.body.pg_pass,
@@ -56,6 +58,7 @@ exports.insertEnv = async req => {
       env_ssh_priv_key: req.body.env_ssh_priv_key,
       env_ssh_pass: req.body.env_ssh_pass,
       pg_host: req.body.pg_host,
+      pg_port: req.body.pg_port,
       pg_db: req.body.pg_db,
       pg_username: req.body.pg_username,
       pg_pass: req.body.pg_pass
@@ -72,18 +75,20 @@ exports.updateEnv = async req => {
     ,environment_ssh_priv_key = $3
     ,environment_ssh_passphrase = $4
     ,pg_host = $5
-    ,pg_database = $6
-    ,pg_username = $7
-    ,pg_password = $8
-    ,last_updated_by_user_id = $9
+    ,pg_port = $6
+    ,pg_database = $7
+    ,pg_username = $8
+    ,pg_password = $9
+    ,last_updated_by_user_id = $10
   WHERE
-    e.environment_id = $10`;
+    e.environment_id = $11`;
   const queryParams = [
     req.body.env_ssh_host,
     req.body.env_ssh_username,
     req.body.env_ssh_priv_key,
     req.body.env_ssh_pass,
     req.body.pg_host,
+    req.body.pg_port,
     req.body.pg_db,
     req.body.pg_username,
     req.body.pg_pass,
