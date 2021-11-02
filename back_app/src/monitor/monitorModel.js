@@ -3,10 +3,12 @@ const interDbPool = require('../db');
 const tunnel = require('tunnel-ssh');
 const fs = require('fs');
 const { AppError } = require('../error');
+const { Pool } = require('pg');
+const queryParser = require('./queryParser');
 
 const createTunnel = env => {
   const config = {
-    host: env.pg_host,
+    host: env.environment_ssh_host,
     username: env.environment_ssh_username,
     dstHost: env.pg_host,
     dstPort: env.pg_port,
@@ -19,6 +21,17 @@ const createTunnel = env => {
   return tnl;
 };
 
+const createDbClient = async env => {
+  const pool = new Pool({
+    user: process.env.PGUSER,
+    host: process.env.PGHOST,
+    database: process.env.PGDATABASE,
+    password: process.env.PGPASSWORD,
+    port: process.env.PGPORT
+  });
+  return await pool.connect();
+};
+
 exports.runQuery = async (u_id, env_id, q_id) => {
   const queryText = `
     SELECT * FROM app.sp_environment_query($1, $2, $3)
@@ -28,7 +41,15 @@ exports.runQuery = async (u_id, env_id, q_id) => {
     env_id,
     q_id
   ]);
-  const tunnel = createTunnel(rows[0].sp_environment_query[0].environment);
-  tunnel.close();
-  return rows[0].sp_environment_query[0];
+  const tnl = createTunnel(rows[0].sp_environment_query[0].environment);
+  const client = await createDbClient();
+  const result = await client.query(
+    queryParser.parseQuery(rows[0].sp_environment_query[1].query.query_text),
+    []
+  );
+
+  client.release();
+  tnl.close();
+
+  return result;
 };
