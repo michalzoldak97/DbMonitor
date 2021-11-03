@@ -18,6 +18,7 @@ const createTunnel = env => {
   const tnl = tunnel(config, (err, server) => {
     if (err) return new AppError(`Tunnel set up failure`, 500);
   });
+  console.log(`${Object.keys(tnl)}`);
   return tnl;
 };
 
@@ -42,6 +43,9 @@ exports.runQuery = async (u_id, env_id, q_id) => {
     q_id
   ]);
   const tnl = createTunnel(rows[0].sp_environment_query[0].environment);
+  tnl.on('error', err => {
+    throw new AppError(`TunnelSSHError`, 500);
+  });
   const client = await createDbClient();
   const result = await client.query(
     queryParser.parseQuery(rows[0].sp_environment_query[1].query.query_text),
