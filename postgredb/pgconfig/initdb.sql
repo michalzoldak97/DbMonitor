@@ -130,6 +130,12 @@ CREATE TABLE app.tbl_query_parameter(
 )
 ;
 
+CREATE TABLE app.tbl_config(
+    config_id BIGSERIAL PRIMARY KEY,
+    config_json JSONB NOT NULL
+)
+;
+
 CREATE INDEX idx_user_permission_user ON usr.tbl_user_permission (user_id)
 ;
 
@@ -143,65 +149,62 @@ CREATE INDEX idx_query_param_query ON app.tbl_query_parameter (query_id)
 ;
 
 CREATE OR REPLACE FUNCTION app.sp_user_settings(usr_id BIGINT)
-RETURNS TABLE (setting JSON) AS
-$$
+RETURNS TABLE (user_setting JSONB)
+LANGUAGE plpgsql
+AS $function$
 BEGIN
-DROP TABLE IF EXISTS tbl_user_setting_json;
-CREATE TEMPORARY TABLE tbl_user_setting_json(
-    setting JSON
-);
-INSERT INTO tbl_user_setting_json (setting)
-SELECT row_to_json(a) FROM (
-                            SELECT 
-                                'permission'::VARCHAR AS set_type
-                                ,up.permission_id  
-                                ,p.permission_name
-                            FROM usr.tbl_permission p
-                            INNER JOIN usr.tbl_user_permission up              ON p.permission_id = up.permission_id
-                            WHERE 
-                                p.deactivated_datetime IS NULL
-                                AND up.user_id = usr_id
     
-) a;
-INSERT INTO tbl_user_setting_json (setting)
-SELECT row_to_json(a) FROM (
-                            SELECT 
-                                'environment'::VARCHAR AS set_type
-                                ,ue.environment_id  
-                                ,e.pg_database AS database_name
-                            FROM app.tbl_environment e
-                            INNER JOIN usr.tbl_user_environment ue              ON e.environment_id = ue.environment_id
-                            WHERE 
-                                e.deactivated_datetime IS NULL
-                                AND ue.user_id = usr_id
-) a;
-INSERT INTO tbl_user_setting_json (setting)
-SELECT row_to_json(a) FROM (
-                            SELECT 
-                                'query_set'::VARCHAR AS set_type
-                                ,uqs.query_set_id  
-                                ,qs.query_set_name 
-                            FROM app.tbl_query_set qs
-                            INNER JOIN usr.tbl_user_query_set uqs                ON qs.query_set_id = uqs.query_set_id
-                            WHERE 
-                                qs.deactivated_datetime IS NULL
-                                AND uqs.user_id = usr_id
-) a;
-INSERT INTO tbl_user_setting_json (setting)
-SELECT row_to_json(a) FROM (
-                            SELECT 
-                                'query'::VARCHAR AS set_type
-                                ,uq.query_id 
-                                ,q.query_name
-                            FROM app.tbl_query q
-                            INNER JOIN usr.tbl_user_query uq                ON q.query_id = uq.query_id
-                            WHERE 
-                                q.deactivated_datetime IS NULL
-                                AND uq.user_id = usr_id
-) a;
-RETURN QUERY SELECT usj.setting FROM tbl_user_setting_json usj;
+RETURN QUERY
+    SELECT row_to_json(a)::JSONB 
+    FROM (
+        SELECT 
+            'permission'::VARCHAR AS set_type
+            ,p.permission_name
+        FROM usr.tbl_permission p
+        INNER JOIN usr.tbl_user_permission up              ON p.permission_id = up.permission_id
+        WHERE 
+            p.deactivated_datetime IS NULL
+            AND up.user_id = usr_id
+    ) a
+    UNION ALL
+    SELECT row_to_json(a)::JSONB 
+    FROM (
+        SELECT 
+            'environment'::VARCHAR AS set_type
+            ,e.pg_database AS database_name
+        FROM app.tbl_environment e
+        INNER JOIN usr.tbl_user_environment ue              ON e.environment_id = ue.environment_id
+        WHERE 
+            e.deactivated_datetime IS NULL
+            AND ue.user_id = usr_id
+    ) a
+    UNION ALL
+    SELECT row_to_json(a)::JSONB 
+    FROM (
+        SELECT 
+            'query_set'::VARCHAR AS set_type
+            ,qs.query_set_name 
+        FROM app.tbl_query_set qs
+        INNER JOIN usr.tbl_user_query_set uqs                ON qs.query_set_id = uqs.query_set_id
+        WHERE 
+            qs.deactivated_datetime IS NULL
+            AND uqs.user_id = usr_id
+    ) a
+    UNION ALL
+    SELECT row_to_json(a)::JSONB 
+    FROM (
+        SELECT 
+            'query'::VARCHAR AS set_type
+            ,q.query_name
+        FROM app.tbl_query q
+        INNER JOIN usr.tbl_user_query uq                ON q.query_id = uq.query_id
+        WHERE 
+            q.deactivated_datetime IS NULL
+            AND uq.user_id = usr_id
+    ) a
+    ;
 END;
-$$ LANGUAGE plpgsql
+$function$
 ;
 
 CREATE OR REPLACE FUNCTION app.tf_environment_deactivate(env_to_deactivate_id BIGINT, requesting_user_id BIGINT)
