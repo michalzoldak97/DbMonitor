@@ -159,7 +159,7 @@ RETURN QUERY
     FROM (
         SELECT 
             'permission'::VARCHAR AS set_type
-            ,p.permission_name
+            ,p.permission_name AS name
         FROM usr.tbl_permission p
         INNER JOIN usr.tbl_user_permission up              ON p.permission_id = up.permission_id
         WHERE 
@@ -171,7 +171,7 @@ RETURN QUERY
     FROM (
         SELECT 
             'environment'::VARCHAR AS set_type
-            ,e.pg_database AS database_name
+            ,e.pg_database AS name
         FROM app.tbl_environment e
         INNER JOIN usr.tbl_user_environment ue              ON e.environment_id = ue.environment_id
         WHERE 
@@ -183,7 +183,7 @@ RETURN QUERY
     FROM (
         SELECT 
             'query_set'::VARCHAR AS set_type
-            ,qs.query_set_name 
+            ,qs.query_set_name AS name
         FROM app.tbl_query_set qs
         INNER JOIN usr.tbl_user_query_set uqs                ON qs.query_set_id = uqs.query_set_id
         WHERE 
@@ -195,7 +195,7 @@ RETURN QUERY
     FROM (
         SELECT 
             'query'::VARCHAR AS set_type
-            ,q.query_name
+            ,q.query_name AS name
         FROM app.tbl_query q
         INNER JOIN usr.tbl_user_query uq                ON q.query_id = uq.query_id
         WHERE 
