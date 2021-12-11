@@ -75,7 +75,7 @@ exports.selectMySetUp = async id => {
 
 exports.selectUserSetUp = async (myId, usrId) => {
   const queryText = `SELECT a.* FROM app.sp_user_settings($1) a 
-                     INNER JOIN app.sp_user_settings($2) b ON a.setting::TEXT = b.setting::TEXT`;
+                     INNER JOIN app.sp_user_settings($2) b ON a.user_setting = b.user_setting`;
   const { rows } = await dbPool.singleQuery(queryText, [myId, usrId]);
   return rows;
 };
